@@ -1,0 +1,32 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'ml-toolkit-monitor'
+
+scrape_configs:
+  # Monitoring de l'application ML Toolkit
+  - job_name: 'ml_toolkit'
+    static_configs:
+      - targets: ['ml_toolkit:8000']  # Si vous ajoutez des métriques Prometheus
+    
+  # Monitoring d'Airflow
+  - job_name: 'airflow'
+    static_configs:
+      - targets: ['airflow-webserver:8080']
+  
+  # Monitoring de BentoML
+  - job_name: 'bentoml'
+    static_configs:
+      - targets: ['bentoml:3000']
+    metrics_path: '/metrics'
+  
+  # Monitoring de PostgreSQL
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:5432']
+  
+  # Self-monitoring de Prometheus
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

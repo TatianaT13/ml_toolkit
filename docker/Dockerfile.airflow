@@ -1,0 +1,27 @@
+FROM apache/airflow:2.8.1-python3.10
+
+USER root
+
+# Installer les dépendances système
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+USER airflow
+
+# Copier les requirements du projet ML
+COPY requirements.txt /tmp/ml_requirements.txt
+
+# Installer les dépendances Python pour ML
+RUN pip install --no-cache-dir -r /tmp/ml_requirements.txt
+
+# Installer des packages supplémentaires pour Airflow
+RUN pip install --no-cache-dir \
+    apache-airflow-providers-postgres \
+    apache-airflow-providers-celery \
+    redis \
+    psycopg2-binary

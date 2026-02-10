@@ -1,0 +1,18 @@
+FROM python:3.10-slim
+
+WORKDIR /app
+
+# Installer BentoML et dépendances
+RUN pip install --no-cache-dir bentoml pandas scikit-learn numpy scipy
+
+# Copier le code source ML
+COPY . /app/my_ml_toolkit
+
+# Copier le service
+COPY bentoml/service.py /app/
+
+# Exposer le port
+EXPOSE 3000
+
+# Lancer le service
+CMD ["bentoml", "serve", "service:svc", "--host", "0.0.0.0", "--port", "3000"]

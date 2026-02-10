@@ -1,0 +1,6 @@
+[core]
+    remote = dagshub
+    autostage = true
+
+['remote "dagshub"']
+    url = https://dagshub.com/TatianaT13/ml_toolkit.dvc

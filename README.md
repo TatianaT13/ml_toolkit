@@ -1,107 +1,304 @@
-<<<<<<< HEAD
-# 🚀 My ML Toolkit
+# 🚀 ML Toolkit MLOps - Architecture Complète
 
-Outil ML/DL polyvalent pour automatiser toutes les tâches de Machine Learning, du prétraitement à la prédiction.
+Système automatisé de détection de malwares avec pipeline MLOps complet.
 
-**Supporte 3 types de données:**
-- 📊 **Tabulaires** (CSV, Excel)
-- 📝 **Texte** (TXT, JSON)
-- 🔐 **Binaires** (Fichiers exécutables, données cybersécurité)
+## 📋 Table des Matières
 
----
-
-## 🎯 Fonctionnalités
-
-✅ Chargement automatique de données  
-✅ Extraction de features adaptée au type de données  
-✅ Prétraitement complet (valeurs manquantes, encodage, normalisation)  
-✅ Entraînement automatique de plusieurs modèles  
-✅ Comparaison et sélection du meilleur modèle  
-✅ Prédictions sur nouvelles données  
-
-**Spécial Cybersécurité:**
-- Extraction de features de fichiers binaires
-- Analyse d'entropie (détection de chiffrement)
-- Détection de signatures (PE, ELF, PDF, etc.)
-- N-grams binaires
-- Support pour fichiers PE (malware analysis)
+- [Architecture](#architecture)
+- [Services](#services)
+- [Installation](#installation)
+- [Utilisation](#utilisation)
+- [Monitoring](#monitoring)
+- [API](#api)
 
 ---
 
-## 📦 Installation
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    MLOPS ARCHITECTURE                        │
+├─────────────────────────────────────────────────────────────┤
+│                                                              │
+│  📊 Data Collection                                          │
+│  └─> Malware samples + Benign files                         │
+│       └─> DVC (Data Version Control)                        │
+│                                                              │
+│  🔄 Airflow Pipeline (Daily)                                 │
+│  ├─> Check Data Availability                                │
+│  ├─> Extract Features (binary_features.py)                  │
+│  ├─> Train Model (auto_trainer.py)                          │
+│  ├─> Evaluate Performance                                   │
+│  └─> Deploy Model                                           │
+│                                                              │
+│  🤖 BentoML API                                              │
+│  └─> REST API for malware detection                         │
+│       POST /scan_file → {is_malware, confidence}            │
+│                                                              │
+│  📈 Monitoring                                               │
+│  ├─> Prometheus (Metrics)                                   │
+│  └─> Grafana (Dashboards)                                   │
+│                                                              │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🛠️ Services
+
+### 1. **ML Toolkit** (Port: interne)
+Application principale de Machine Learning
+- Extraction de features binaires
+- Entraînement automatique de modèles
+- Support multi-types de données
+
+### 2. **Airflow** (Port: 8080)
+Orchestration du pipeline ML
+- **Webserver**: Interface de gestion
+- **Scheduler**: Planification des tâches
+- **Worker**: Exécution des jobs
+- **Login**: `admin` / `admin`
+
+### 3. **BentoML** (Port: 3000)
+API REST pour détection en temps réel
+- Endpoint: `POST /scan_file`
+- Analyse de fichiers suspects
+- Réponse avec confiance et features
+
+### 4. **PostgreSQL** (Port: 5432)
+Base de données pour Airflow
+- Stockage métadonnées des DAGs
+- Historique des exécutions
+
+### 5. **Redis** (Port: 6379)
+Message broker pour Celery (Airflow)
+- File d'attente des tâches
+- Communication inter-workers
+
+### 6. **Prometheus** (Port: 9090)
+Collecte de métriques
+- Performance des modèles
+- Santé des services
+- Utilisation ressources
+
+### 7. **Grafana** (Port: 3001)
+Visualisation et dashboards
+- **Login**: `admin` / `admin`
+- Métriques temps réel
+- Alertes personnalisées
+
+---
+
+## ⚙️ Installation
+
+### Prérequis
+
+- Docker & Docker Compose
+- Git
+- 8GB RAM minimum
+- 20GB espace disque
+
+### 🚀 Démarrage Rapide
 
 ```bash
-# Cloner ou copier le projet
-cd my_ml_toolkit
+# 1. Cloner le repository
+git clone git@github.com:TatianaT13/ml_toolkit.git
+cd ml_toolkit
 
-# Installer les dépendances de base
-pip install -r requirements.txt
+# 2. Copier les fichiers MLOps
+# (Les fichiers Dockerfile, docker-compose.yml, etc.)
 
-# Optionnel: Pour analyse de fichiers PE (Windows)
-pip install pefile
+# 3. Créer la structure de données
+mkdir -p data/{malware_samples,benign_samples} models
+
+# 4. Lancer tous les services
+docker-compose up -d
+
+# 5. Vérifier que tout est démarré
+docker-compose ps
+```
+
+### 📊 Initialisation d'Airflow
+
+```bash
+# Attendre que tous les services soient UP (~2 minutes)
+docker-compose logs -f airflow-webserver
+
+# Quand vous voyez "Airflow Webserver started"
+# Ouvrir http://localhost:8080
+# Login: admin / admin
 ```
 
 ---
 
-## 🚀 Utilisation Rapide
+## 🎯 Utilisation
 
-### 1️⃣ Données Tabulaires (CSV, Excel)
+### 1️⃣ Pipeline Automatique (Airflow)
 
-```python
-from my_ml_toolkit import MLPipeline
+Le pipeline s'exécute **automatiquement chaque jour** :
 
-# Créer le pipeline
-pipeline = MLPipeline(data_type='tabular', task_type='classification')
+1. **Vérification des données** : Compte les fichiers disponibles
+2. **Génération synthétique** : Si pas assez de données
+3. **Extraction features** : Analyse tous les fichiers
+4. **Entraînement** : Teste 5 modèles ML
+5. **Évaluation** : Génère un rapport
+6. **Déploiement** : Met à jour l'API
 
-# Exécuter tout le pipeline en une ligne !
-results = pipeline.run_full_pipeline(
-    filepath='data.csv',
-    target_col='target',  # Colonne à prédire
-    verbose=True
-)
+**Lancer manuellement** :
+```bash
+# Via l'interface Airflow
+# http://localhost:8080 → DAGs → ml_malware_detection_pipeline → Trigger
 
-# Le meilleur modèle est automatiquement sélectionné
-best_name, best_model = pipeline.trainer.get_best_model()
-print(f"Meilleur modèle: {best_name}")
-
-# Prédire sur nouvelles données
-predictions = pipeline.predict_new_data('new_data.csv')
+# Ou via CLI
+docker exec airflow-webserver airflow dags trigger ml_malware_detection_pipeline
 ```
 
-### 2️⃣ Données Binaires (Cybersécurité)
+### 2️⃣ API de Détection (BentoML)
 
-```python
-from my_ml_toolkit.data_loader.binary import BinaryLoader
-from my_ml_toolkit.feature_extraction.binary_features import BinaryFeatureExtractor
+**Scanner un fichier suspect** :
 
-# Charger un fichier binaire
-loader = BinaryLoader()
-data = loader.load_file('suspicious_file.exe')
+```bash
+# Test avec curl
+curl -X POST http://localhost:3000/scan_file \
+  -F "file=@suspicious_file.exe"
 
-# Extraire les features
-extractor = BinaryFeatureExtractor()
-features = extractor.extract_all_features(data)
-
-print(f"Entropie: {features['entropy']:.2f}")
-print(f"Type de fichier détecté: {features}")
-
-# Analyser un répertoire complet
-files_data = loader.load_directory('malware_samples/', extensions=['.exe', '.dll'])
+# Réponse
+{
+  "is_malware": true,
+  "confidence": 0.95,
+  "prediction": "MALWARE",
+  "features": {
+    "entropy": 7.82,
+    "file_size": 1024,
+    "printable_ratio": 0.15
+  },
+  "model_info": {
+    "name": "RandomForest",
+    "trained_at": "2024-02-10T19:00:00"
+  }
+}
 ```
 
-### 3️⃣ Données Texte
+**Python Client** :
 
 ```python
-from my_ml_toolkit.feature_extraction.text_features import TextFeatureExtractor
+import requests
 
-extractor = TextFeatureExtractor()
+with open('file_to_scan.exe', 'rb') as f:
+    response = requests.post(
+        'http://localhost:3000/scan_file',
+        files={'file': f}
+    )
 
-# Extraire features d'un texte
-text = "Votre texte ici..."
-features = extractor.extract_all_features(text)
+result = response.json()
+if result['is_malware']:
+    print(f"⚠️  MALWARE détecté ! Confiance: {result['confidence']:.2%}")
+else:
+    print(f"✅ Fichier légitime. Confiance: {result['confidence']:.2%}")
+```
 
-print(f"Longueur: {features['text_length']}")
-print(f"Nombre de mots: {features['word_count']}")
+### 3️⃣ Ajouter Vos Données
+
+```bash
+# Copier vos fichiers malwares
+cp /path/to/malwares/* data/malware_samples/
+
+# Copier vos fichiers légitimes
+cp /path/to/benign/* data/benign_samples/
+
+# Le prochain run du pipeline les utilisera automatiquement
+```
+
+### 4️⃣ Versioning avec DVC
+
+```bash
+# Installer DVC
+pip install dvc
+
+# Initialiser DVC dans le projet
+dvc init
+
+# Tracker les données
+dvc add data/malware_samples
+dvc add data/benign_samples
+dvc add models/
+
+# Pousser vers DagsHub
+dvc push
+
+# Git commit
+git add .
+git commit -m "Update datasets and models"
+git push
+```
+
+---
+
+## 📊 Monitoring
+
+### Prometheus (http://localhost:9090)
+
+**Métriques disponibles** :
+- Taux de prédictions malware vs benign
+- Temps de réponse API
+- Accuracy du modèle actuel
+- Utilisation CPU/RAM
+
+**Exemples de queries** :
+```promql
+# Nombre total de prédictions
+sum(prediction_counter)
+
+# Taux de malwares détectés
+rate(malware_detected[5m])
+
+# Temps moyen de prédiction
+avg(prediction_duration_seconds)
+```
+
+### Grafana (http://localhost:3001)
+
+**Login** : `admin` / `admin`
+
+**Dashboards à créer** :
+1. **ML Performance**
+   - Accuracy over time
+   - Confusion matrix
+   - False positives/negatives
+
+2. **API Monitoring**
+   - Request rate
+   - Response time
+   - Error rate
+
+3. **System Health**
+   - CPU usage
+   - Memory usage
+   - Disk space
+
+---
+
+## 🔧 Commandes Utiles
+
+```bash
+# Voir les logs d'un service
+docker-compose logs -f airflow-webserver
+docker-compose logs -f bentoml
+
+# Redémarrer un service
+docker-compose restart airflow-scheduler
+
+# Accéder au shell d'un container
+docker exec -it ml_toolkit_app bash
+
+# Voir l'état des services
+docker-compose ps
+
+# Arrêter tous les services
+docker-compose down
+
+# Arrêter et supprimer les volumes (⚠️ perte de données)
+docker-compose down -v
 ```
 
 ---
@@ -109,141 +306,114 @@ print(f"Nombre de mots: {features['word_count']}")
 ## 📁 Structure du Projet
 
 ```
-my_ml_toolkit/
-├── __init__.py              # Point d'entrée principal
-├── pipeline.py              # Pipeline ML complet
-│
-├── data_loader/             # Chargement de données
-│   ├── tabular.py          # CSV, Excel, JSON
-│   └── binary.py           # Fichiers binaires
-│
-├── preprocessing/           # Prétraitement
-│   └── numeric_prep.py     # Normalisation, encodage, etc.
-│
-├── feature_extraction/      # Extraction de features
-│   ├── binary_features.py  # Features binaires (cyber)
-│   └── text_features.py    # Features textuelles
-│
-├── modeling/                # Modélisation
-│   └── auto_trainer.py     # Entraînement automatique
-│
-├── examples/                # Exemples d'utilisation
-│   └── demo_binary_analysis.py
-│
-├── requirements.txt         # Dépendances
-└── README.md               # Ce fichier
+ml_toolkit_mlops/
+├── docker/
+│   └── Dockerfile.airflow          # Image Airflow personnalisée
+├── airflow/
+│   ├── dags/
+│   │   └── ml_pipeline_dag.py      # Pipeline ML automatisé
+│   ├── logs/                        # Logs Airflow
+│   └── plugins/                     # Plugins personnalisés
+├── bentoml/
+│   ├── service.py                   # Service API
+│   └── Dockerfile.bentoml          # Image BentoML
+├── monitoring/
+│   ├── prometheus.yml              # Config Prometheus
+│   └── grafana-datasources.yml     # Datasources Grafana
+├── data/
+│   ├── malware_samples/            # Fichiers malveillants
+│   └── benign_samples/             # Fichiers légitimes
+├── models/                          # Modèles entraînés
+├── my_ml_toolkit/                   # Code source du toolkit
+├── Dockerfile                       # Image principale
+├── docker-compose.yml              # Orchestration
+└── README.md                        # Ce fichier
 ```
 
 ---
 
-## 🔐 Cas d'Usage Cybersécurité
+## 🎓 Cas d'Usage
 
-### Détection de Malwares
+### 1. **Détection de Malwares en Production**
+- Upload de fichiers suspects via API
+- Analyse automatique en temps réel
+- Alertes si malware détecté
 
-```python
-from my_ml_toolkit import MLPipeline
-import pandas as pd
+### 2. **Recherche en Cybersécurité**
+- Dataset versionné avec DVC
+- Expérimentation de nouvelles features
+- Comparaison de modèles
 
-# 1. Collecter des samples (malwares + fichiers légitimes)
-# 2. Extraire les features
-pipeline = MLPipeline(data_type='binary', task_type='classification')
-
-loader = pipeline.loader
-extractor = pipeline.feature_extractor
-
-# Charger malwares
-malware_files = loader.load_directory('malware_samples/', extensions=['.exe'])
-malware_features = []
-for filename, data in malware_files:
-    features = extractor.extract_all_features(data)
-    features['label'] = 1  # Malware
-    malware_features.append(features)
-
-# Charger fichiers légitimes
-benign_files = loader.load_directory('benign_samples/', extensions=['.exe'])
-benign_features = []
-for filename, data in benign_files:
-    features = extractor.extract_all_features(data)
-    features['label'] = 0  # Légitime
-    benign_features.append(features)
-
-# Créer dataset
-df = pd.DataFrame(malware_features + benign_features)
-
-# Entraîner
-X = df.drop(columns=['label', 'md5', 'sha256', 'filename'])
-y = df['label']
-
-X_processed, y = pipeline.preprocess(X, y)
-results = pipeline.train(X_processed, y)
-
-# Le modèle peut maintenant détecter de nouveaux malwares !
-```
-
-### Features Importantes pour Détection
-
-| Feature | Description | Utilité |
-|---------|-------------|---------|
-| `entropy` | Entropie de Shannon (0-8) | Détecte chiffrement/packing |
-| `high_entropy_sections` | Sections avec haute entropie | Code obfusqué |
-| `signature_is_pe` | Fichier PE détecté | Type de fichier |
-| `printable_ratio` | Ratio de caractères lisibles | Distingue binaire/texte |
-| `null_bytes_ratio` | Ratio de bytes NULL | Padding, structure |
+### 3. **Formation et Apprentissage**
+- Pipeline ML complet de bout en bout
+- Best practices MLOps
+- Monitoring et observabilité
 
 ---
 
-## 🧪 Tester l'Extraction de Features
+## 🐛 Troubleshooting
 
+### Airflow ne démarre pas
 ```bash
-# Exécuter la démo d'analyse binaire
-python examples/demo_binary_analysis.py
+# Réinitialiser la DB
+docker-compose down -v
+docker-compose up -d
 ```
 
-Cette démo montre:
-- ✅ Extraction de features de 3 types de fichiers
-- ✅ Calcul d'entropie
-- ✅ Détection de signatures
-- ✅ Interprétation pour cybersécurité
+### BentoML erreur "Model not found"
+```bash
+# Vérifier que le modèle existe
+ls -la models/malware_detector.pkl
+
+# Lancer le pipeline Airflow pour générer un modèle
+```
+
+### Prometheus ne collecte pas de métriques
+```bash
+# Vérifier la config
+docker exec prometheus cat /etc/prometheus/prometheus.yml
+
+# Redémarrer Prometheus
+docker-compose restart prometheus
+```
 
 ---
 
-## 🎓 Prochaines Améliorations
+## 🚀 Prochaines Améliorations
 
-**À venir:**
-- [ ] Support pour images (CNN)
-- [ ] Deep Learning (LSTM pour séquences)
-- [ ] Hyperparameter tuning automatique
-- [ ] Explainability (SHAP, LIME)
-- [ ] API REST pour déploiement
-- [ ] Dashboard de monitoring
-- [ ] Support pour séries temporelles
-
----
-
-## 📚 Ressources
-
-**Cybersécurité & Malware Analysis:**
-- [VirusTotal](https://www.virustotal.com) - Dataset de malwares
-- [MalwareBazaar](https://bazaar.abuse.ch) - Échantillons de malwares
-- [pefile documentation](https://github.com/erocarrera/pefile) - Analyse de PE files
-
-**Machine Learning:**
-- [Scikit-learn](https://scikit-learn.org)
-- [Pandas](https://pandas.pydata.org)
+- [ ] Intégration CI/CD (GitHub Actions)
+- [ ] Tests automatisés du pipeline
+- [ ] Dashboard Grafana préconfiguré
+- [ ] Alertes Slack/Email
+- [ ] Support pour datasets externes (VirusTotal)
+- [ ] A/B testing de modèles
+- [ ] Export de métriques custom
 
 ---
 
-## 📝 License
+## 📄 License
 
-MIT License - Utilisez librement !
+MIT License - Utilisation libre
 
 ---
 
 ## 👤 Auteur
 
-Créé pour automatiser les tâches répétitives de ML et faciliter l'analyse de données en cybersécurité.
+**Tatiana Tarasenko**  
+GitHub: [@TatianaT13](https://github.com/TatianaT13)
 
-**Questions? Suggestions?** N'hésitez pas à contribuer !
-=======
-# ml_toolkit
->>>>>>> 63ea5024d145711f6e6977171692258aaa79b980
+---
+
+## 🙏 Contribution
+
+Les contributions sont les bienvenues !
+
+1. Fork le projet
+2. Créer une branche (`git checkout -b feature/amazing`)
+3. Commit (`git commit -m 'Add amazing feature'`)
+4. Push (`git push origin feature/amazing`)
+5. Ouvrir une Pull Request
+
+---
+
+**🎉 Bon apprentissage MLOps !**
