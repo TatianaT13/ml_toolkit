@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🚀 My ML Toolkit
 
 Outil ML/DL polyvalent pour automatiser toutes les tâches de Machine Learning, du prétraitement à la prédiction.
@@ -243,3 +244,6 @@ MIT License - Utilisez librement !
 Créé pour automatiser les tâches répétitives de ML et faciliter l'analyse de données en cybersécurité.
 
 **Questions? Suggestions?** N'hésitez pas à contribuer !
+=======
+# ml_toolkit
+>>>>>>> 63ea5024d145711f6e6977171692258aaa79b980
