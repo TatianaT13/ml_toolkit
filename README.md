@@ -17,28 +17,28 @@ Système automatisé de détection de malwares avec pipeline MLOps complet.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    MLOPS ARCHITECTURE                        │
+│                    MLOPS ARCHITECTURE                       │
 ├─────────────────────────────────────────────────────────────┤
-│                                                              │
-│  📊 Data Collection                                          │
+│                                                             │
+│  📊 Data Collection                                         │
 │  └─> Malware samples + Benign files                         │
 │       └─> DVC (Data Version Control)                        │
-│                                                              │
-│  🔄 Airflow Pipeline (Daily)                                 │
+│                                                             │
+│  🔄 Airflow Pipeline (Daily)                                │
 │  ├─> Check Data Availability                                │
 │  ├─> Extract Features (binary_features.py)                  │
 │  ├─> Train Model (auto_trainer.py)                          │
 │  ├─> Evaluate Performance                                   │
 │  └─> Deploy Model                                           │
-│                                                              │
-│  🤖 BentoML API                                              │
+│                                                             │
+│  🤖 BentoML API                                             │
 │  └─> REST API for malware detection                         │
 │       POST /scan_file → {is_malware, confidence}            │
-│                                                              │
-│  📈 Monitoring                                               │
+│                                                             │
+│  📈 Monitoring                                              │
 │  ├─> Prometheus (Metrics)                                   │
 │  └─> Grafana (Dashboards)                                   │
-│                                                              │
+│                                                             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -308,25 +308,25 @@ docker-compose down -v
 ```
 ml_toolkit_mlops/
 ├── docker/
-│   └── Dockerfile.airflow          # Image Airflow personnalisée
+│   └── Dockerfile.airflow           # Image Airflow personnalisée
 ├── airflow/
 │   ├── dags/
-│   │   └── ml_pipeline_dag.py      # Pipeline ML automatisé
+│   │   └── ml_pipeline_dag.py       # Pipeline ML automatisé
 │   ├── logs/                        # Logs Airflow
 │   └── plugins/                     # Plugins personnalisés
 ├── bentoml/
 │   ├── service.py                   # Service API
-│   └── Dockerfile.bentoml          # Image BentoML
+│   └── Dockerfile.bentoml           # Image BentoML
 ├── monitoring/
-│   ├── prometheus.yml              # Config Prometheus
-│   └── grafana-datasources.yml     # Datasources Grafana
+│   ├── prometheus.yml               # Config Prometheus
+│   └── grafana-datasources.yml      # Datasources Grafana
 ├── data/
-│   ├── malware_samples/            # Fichiers malveillants
-│   └── benign_samples/             # Fichiers légitimes
+│   ├── malware_samples/             # Fichiers malveillants
+│   └── benign_samples/              # Fichiers légitimes
 ├── models/                          # Modèles entraînés
 ├── my_ml_toolkit/                   # Code source du toolkit
 ├── Dockerfile                       # Image principale
-├── docker-compose.yml              # Orchestration
+├── docker-compose.yml               # Orchestration
 └── README.md                        # Ce fichier
 ```
 
@@ -399,7 +399,7 @@ MIT License - Utilisation libre
 
 ## 👤 Auteur
 
-**Tatiana Tarasenko**  
+**Tetyana Tarasenko**  
 GitHub: [@TatianaT13](https://github.com/TatianaT13)
 
 ---
