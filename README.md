@@ -189,8 +189,8 @@ print(predictions)  # [0=benign, 1=malware]
 │   └──────────┬──────────────────────────┘                │
 │              │                                           │
 │   ┌──────────▼──────────┐  ┌────────────────────────┐    │
-│   │  Airflow (Port 8080) │  │ VirusTotal Integration │   │
-│   │  Daily Retraining    │  │ Cross-validation       │   │
+│   │  Airflow (Port 8080)│  │ VirusTotal Integration │    │
+│   │  Daily Retraining   │  │ Cross-validation       │    │
 │   └──────────┬──────────┘  └────────────────────────┘    │
 │              │                                           │
 │   ┌──────────▼──────────────────────────┐                │
