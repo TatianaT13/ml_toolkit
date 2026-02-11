@@ -242,6 +242,33 @@ async def delete_pipeline(pipeline_id: str):
         "remaining_pipelines": len(pipelines)
     }
 
+@app.post("/validate/{pipeline_id}")
+async def validate_with_virustotal(
+    pipeline_id: str,
+    file: UploadFile = File(...),
+    vt_api_key: str = None
+):
+    """
+    Prédire ET valider avec VirusTotal
+    """
+    if not vt_api_key:
+        raise HTTPException(400, "VirusTotal API key required")
+    
+    # Faire la prédiction ML
+    # ... (code existant)
+    
+    # Valider avec VirusTotal
+    from my_ml_toolkit.integrations.virustotal import VirusTotalIntegration
+    
+    vt = VirusTotalIntegration(vt_api_key)
+    comparison = vt.compare_with_ml_prediction(temp_path, prediction[0])
+    vt.close()
+    
+    return {
+        "ml_result": prediction,
+        "virustotal_validation": comparison
+    }
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)

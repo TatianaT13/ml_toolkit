@@ -18,7 +18,7 @@ joblib==1.5.3
 jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 MarkupSafe==3.0.3
--e git+ssh://git@github.com/TatianaT13/ml_toolkit.git@f5efb39ff86d24d0d061a57ccbb42c8da0a6fc92#egg=my_ml_toolkit
+-e git+ssh://git@github.com/TatianaT13/ml_toolkit.git@40f29d8fcb9478121e1ade0a7120055266a8fdfd#egg=my_ml_toolkit
 narwhals==2.16.0
 numpy==2.4.2
 packaging==26.0
@@ -41,6 +41,7 @@ six==1.17.0
 smmap==5.0.2
 starlette==0.52.1
 streamlit==1.54.0
+tabulate==0.9.0
 tenacity==9.1.4
 threadpoolctl==3.6.0
 toml==0.10.2
