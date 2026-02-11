@@ -1,0 +1,50 @@
+{
+  "version": "1.0.0",
+  "trained_on": "2026-02-11T16:52:28.290325",
+  "num_samples": 10000,
+  "features": [
+    "file_size",
+    "entropy",
+    "num_sections",
+    "num_imports",
+    "num_exports",
+    "has_debug_info",
+    "is_packed",
+    "num_suspicious_strings",
+    "code_section_entropy",
+    "data_section_entropy"
+  ],
+  "results": {
+    "RandomForest": {
+      "accuracy": 1.0,
+      "f1": 0.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "LogisticRegression": {
+      "accuracy": 1.0,
+      "f1": 0.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "GradientBoosting": {
+      "accuracy": 1.0,
+      "f1": 0.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "KNN": {
+      "accuracy": 1.0,
+      "f1": 0.0,
+      "precision": 1.0,
+      "recall": 1.0
+    },
+    "SVM": {
+      "accuracy": 1.0,
+      "f1": 0.0,
+      "precision": 1.0,
+      "recall": 1.0
+    }
+  },
+  "best_model": "RandomForest"
+}
