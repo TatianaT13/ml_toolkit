@@ -42,7 +42,6 @@ MarkupSafe==3.0.3
 marshmallow==4.2.2
 mdurl==0.1.2
 multidict==6.7.1
--e git+ssh://git@github.com/TatianaT13/ml_toolkit.git@1bce198ac4762e1dfd121325453c932aa792e4d3#egg=my_ml_toolkit
 narwhals==2.16.0
 nltk==3.9.2
 numpy==2.4.2
