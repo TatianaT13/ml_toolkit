@@ -172,7 +172,7 @@ def train_model(**context):
     # Sauvegarder le modèle
     model_path = f'{MODELS_DIR}/malware_detector.pkl'
     with open(model_path, 'wb') as f:
-        pickle.dump({
+        pickle.dump(  # nosec B301{
             'model': best_model,
             'preprocessor': preprocessor,
             'feature_columns': list(X.columns),

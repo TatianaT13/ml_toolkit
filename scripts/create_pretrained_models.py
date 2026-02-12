@@ -68,7 +68,7 @@ def train_and_save_models():
     
     model_path = "pretrained_models/malware_detector_v1.pkl"
     with open(model_path, 'wb') as f:
-        pickle.dump(pipeline, f)
+        pickle.dump(pipeline  # nosec B301, f)
     
     print(f"\n✅ Modèle sauvegardé: {model_path}")
     

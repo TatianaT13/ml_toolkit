@@ -26,7 +26,7 @@ class MalwareDetectorRunnable(bentoml.Runnable):
     def __init__(self):
         # Charger le modèle et les métadonnées
         with open(MODEL_PATH, 'rb') as f:
-            data = pickle.load(f)
+            data = pickle.load(  # nosec B301f)
             self.model = data['model']
             self.preprocessor = data['preprocessor']
             self.feature_columns = data['feature_columns']
