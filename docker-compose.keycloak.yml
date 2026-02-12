@@ -1,0 +1,110 @@
+version: '3.8'
+
+services:
+
+  # ─── Keycloak Database ──────────────────────────────────
+  keycloak_postgres:
+    image: postgres:14
+    container_name: keycloak_postgres
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+    volumes:
+      - keycloak_postgres_data:/var/lib/postgresql/data
+    networks:
+      - security_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Keycloak Server ────────────────────────────────────
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak
+    command: start-dev  # start pour production
+    environment:
+      # Database
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak_postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD}
+      # Admin
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN_USER}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+      # Config
+      KC_HOSTNAME: localhost
+      KC_HTTP_ENABLED: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_METRICS_ENABLED: "true"
+      # MFA
+      KC_FEATURES: "preview"
+    ports:
+      - "8180:8080"    # Keycloak Admin UI
+    depends_on:
+      keycloak_postgres:
+        condition: service_healthy
+    networks:
+      - security_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # ─── ML Toolkit API (protégée par Keycloak) ────────────
+  ml_api:
+    build: .
+    container_name: ml_api
+    command: python api.py
+    environment:
+      # Keycloak config
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: ml-toolkit
+      KEYCLOAK_CLIENT_ID: ml-api
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET}
+      # App config
+      SECRET_KEY: ${SECRET_KEY}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+    ports:
+      - "8000:8000"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - security_network
+    restart: unless-stopped
+    user: "1000:1000"
+    security_opt:
+      - no-new-privileges:true
+
+  # ─── Streamlit UI (protégée par Keycloak) ──────────────
+  streamlit:
+    build: .
+    container_name: streamlit
+    command: streamlit run app.py --server.port 8501
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: ml-toolkit
+      KEYCLOAK_CLIENT_ID: ml-streamlit
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_STREAMLIT_SECRET}
+    ports:
+      - "8501:8501"
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    networks:
+      - security_network
+    restart: unless-stopped
+
+networks:
+  security_network:
+    driver: bridge
+
+volumes:
+  keycloak_postgres_data:

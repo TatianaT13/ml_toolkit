@@ -2,11 +2,12 @@
 API REST pour le ML Toolkit - Détection de Malwares
 """
 
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Depends
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import pandas as pd
+import tempfile
 import numpy as np
 import pickle
 import os
@@ -15,6 +16,15 @@ from datetime import datetime
 from my_ml_toolkit.pipeline import MLPipeline
 
 # Initialiser FastAPI
+
+# ─── Keycloak Authentication ─────────────────────────────
+from dotenv import load_dotenv
+load_dotenv()
+
+from my_ml_toolkit.integrations.keycloak_auth import (
+    get_current_user, KeycloakUser
+)
+
 app = FastAPI(
     title="ML Toolkit API - Malware Detection",
     description="API REST pour la détection de malwares avec Machine Learning",
@@ -49,7 +59,7 @@ async def root():
     }
 
 @app.get("/health")
-async def health_check():
+async def health_check(current_user: KeycloakUser = Depends(get_current_user)):
     """Vérifier que l'API fonctionne"""
     return {
         "status": "healthy",
@@ -59,6 +69,7 @@ async def health_check():
 
 @app.post("/train")
 async def train_model(
+    current_user: KeycloakUser = Depends(get_current_user),
     file: UploadFile = File(...),
     data_type: str = "tabular",
     task_type: str = "classification",
@@ -78,7 +89,7 @@ async def train_model(
     """
     try:
         # Sauvegarder le fichier temporairement
-        temp_path = f"/tmp/{file.filename}"
+        temp_path = tempfile.mkstemp(suffix=os.path.splitext(file.filename)[-1])[1]
         with open(temp_path, "wb") as f:
             content = await file.read()
             f.write(content)
@@ -121,10 +132,10 @@ async def train_model(
             "best_model": best_model[0],
             "best_accuracy": float(best_model[1]['accuracy']),
             "all_results": {k: {
-                "accuracy": float(v['accuracy']),
-                "precision": float(v['precision']),
-                "recall": float(v['recall']),
-                "f1": float(v['f1'])
+                "accuracy": float(v.get('accuracy', 0)),
+                "precision": float(v.get('precision', v.get('accuracy', 0))),
+                "recall": float(v.get('recall', v.get('accuracy', 0))),
+                "f1": float(v.get('f1', 0))
             } for k, v in results.items()},
             "message": f"✅ Modèle entraîné avec succès! Meilleur modèle: {best_model[0]}"
         }
@@ -135,6 +146,7 @@ async def train_model(
 @app.post("/predict/{pipeline_id}")
 async def predict(
     pipeline_id: str,
+    current_user: KeycloakUser = Depends(get_current_user),
     file: UploadFile = File(...)
 ):
     """
@@ -156,7 +168,7 @@ async def predict(
             )
         
         # Sauvegarder le fichier temporairement
-        temp_path = f"/tmp/predict_{file.filename}"
+        temp_path = tempfile.mkstemp(suffix=os.path.splitext(file.filename)[-1])[1]
         with open(temp_path, "wb") as f:
             content = await file.read()
             f.write(content)
@@ -185,7 +197,7 @@ async def predict(
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/models")
-async def list_models():
+async def list_models(current_user: KeycloakUser = Depends(get_current_user)):
     """Lister tous les pipelines disponibles"""
     return {
         "total_pipelines": len(pipelines),
@@ -271,4 +283,19 @@ async def validate_with_virustotal(
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=os.getenv("API_HOST", "127.0.0.1"), port=int(os.getenv("API_PORT", "8000")))
+
+# ─── Keycloak Auth Routes ────────────────────────────────
+from my_ml_toolkit.integrations.keycloak_auth import (
+    get_current_user, require_mfa, KeycloakUser
+)
+
+@app.get("/me")
+async def get_me(current_user: KeycloakUser = Depends(get_current_user)):
+    """Infos de l'utilisateur connecté"""
+    return {
+        "username": current_user.username,
+        "email": current_user.email,
+        "roles": current_user.roles,
+        "mfa_enabled": current_user.mfa_enabled
+    }

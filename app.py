@@ -1,4 +1,20 @@
+import sys
+sys.path.insert(0, '.')
+from my_ml_toolkit.integrations.keycloak_streamlit import require_auth, show_login_page, logout
 import streamlit as st
+
+# Vérifier l'authentification
+if not st.session_state.get("authenticated"):
+    show_login_page()
+    st.stop()
+
+# Bouton logout dans sidebar
+with st.sidebar:
+    user = st.session_state.get("user_info", {})
+    st.markdown(f"👤 **{user.get('preferred_username', 'User')}**")
+    st.markdown(f"📧 {user.get('email', '')}")
+    if st.button("🚪 Logout"):
+        logout()
 import pandas as pd
 from my_ml_toolkit.pipeline import MLPipeline
 

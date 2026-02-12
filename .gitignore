@@ -1,7 +1,7 @@
 # Environnement virtuel
 venv/
 env/
-
+.env.example
 # Python
 __pycache__/
 *.py[cod]
@@ -37,3 +37,15 @@ temp_*
 airflow/logs/
 data/
 models/
+.env
+*.env
+*.key
+*.pem
+*.p12
+secrets/
+*.pkl
+*.pyc
+.pytest_cache/
+logs/*.log
+*.sqlite
+*.db

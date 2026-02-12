@@ -50,7 +50,7 @@ class BinaryFeatureExtractor:
         """Features de base du fichier"""
         return {
             'file_size': len(data),
-            'md5': hashlib.md5(data).hexdigest(),
+            'md5': hashlib.md5(data, usedforsecurity=False).hexdigest(),
             'sha256': hashlib.sha256(data).hexdigest()
         }
     
