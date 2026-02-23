@@ -131,40 +131,31 @@ class MLPipeline:
             (X, y) prétraités
         """
         if self.data_type == 'tabular':
-            # Supprimer les colonnes non-numériques problématiques
-            # Garder seulement md5 et sha256 si présents, puis les supprimer
-            cols_to_drop = []
-            for col in X.columns:
-                if X[col].dtype == 'object':
-                    if col not in ['md5', 'sha256', 'filename']:
-                        cols_to_drop.append(col)
-                    else:
-                        # Garder pour info mais pas pour training
-                        cols_to_drop.append(col)
-            
+            # Supprimer toutes les colonnes non-numériques (md5, sha256, filename, etc.)
+            cols_to_drop = [col for col in X.columns
+                            if not pd.api.types.is_numeric_dtype(X[col])]
+
             X_processed = X.drop(columns=cols_to_drop, errors='ignore')
-            
+
             # Prétraiter
             X_processed, _ = self.preprocessor.preprocess_full(
-                X_processed, 
-                handle_missing=True, 
-                encode_cat=True, 
+                X_processed,
+                handle_missing=True,
+                encode_cat=True,
                 scale=True
             )
-            
+
             return X_processed, y
         else:
             # Pour binary et text, les features sont déjà numériques
             # Mais on peut quand même normaliser
             if self.preprocessor is None:
                 self.preprocessor = NumericPreprocessor()
-            
-            # Supprimer colonnes non-numériques
-            cols_to_drop = []
-            for col in X.columns:
-                if X[col].dtype == 'object':
-                    cols_to_drop.append(col)
-            
+
+            # Supprimer colonnes non-numériques (compatible pandas 2.x et 3.x)
+            cols_to_drop = [col for col in X.columns
+                            if not pd.api.types.is_numeric_dtype(X[col])]
+
             X_processed = X.drop(columns=cols_to_drop, errors='ignore')
             
             X_processed = self.preprocessor.scale_features(X_processed, fit=True)
