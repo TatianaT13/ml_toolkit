@@ -49,3 +49,5 @@ secrets/
 logs/*.log
 *.sqlite
 *.db
+.claude/
+.logs/

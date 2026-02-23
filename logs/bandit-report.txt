@@ -1,0 +1,60 @@
+Run started:2026-02-12 13:25:11.865284+00:00
+
+Test results:
+>> Issue: [B108:hardcoded_tmp_directory] Probable insecure usage of temp file/directory.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-377 (https://cwe.mitre.org/data/definitions/377.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.3/plugins/b108_hardcoded_tmp_directory.html
+   Location: ./api.py:81:20
+80	        # Sauvegarder le fichier temporairement
+81	        temp_path = f"/tmp/{file.filename}"
+82	        with open(temp_path, "wb") as f:
+
+--------------------------------------------------
+>> Issue: [B108:hardcoded_tmp_directory] Probable insecure usage of temp file/directory.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-377 (https://cwe.mitre.org/data/definitions/377.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.3/plugins/b108_hardcoded_tmp_directory.html
+   Location: ./api.py:159:20
+158	        # Sauvegarder le fichier temporairement
+159	        temp_path = f"/tmp/predict_{file.filename}"
+160	        with open(temp_path, "wb") as f:
+
+--------------------------------------------------
+>> Issue: [B104:hardcoded_bind_all_interfaces] Possible binding to all interfaces.
+   Severity: Medium   Confidence: Medium
+   CWE: CWE-605 (https://cwe.mitre.org/data/definitions/605.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.3/plugins/b104_hardcoded_bind_all_interfaces.html
+   Location: ./api.py:274:26
+273	    import uvicorn
+274	    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+--------------------------------------------------
+>> Issue: [B324:hashlib] Use of weak MD5 hash for security. Consider usedforsecurity=False
+   Severity: High   Confidence: High
+   CWE: CWE-327 (https://cwe.mitre.org/data/definitions/327.html)
+   More Info: https://bandit.readthedocs.io/en/1.9.3/plugins/b324_hashlib.html
+   Location: my_ml_toolkit/feature_extraction/binary_features.py:53:19
+52	            'file_size': len(data),
+53	            'md5': hashlib.md5(data).hexdigest(),
+54	            'sha256': hashlib.sha256(data).hexdigest()
+
+--------------------------------------------------
+
+Code scanned:
+	Total lines of code: 1122
+	Total lines skipped (#nosec): 0
+	Total potential issues skipped due to specifically being disabled (e.g., #nosec BXXX): 0
+
+Run metrics:
+	Total issues (by severity):
+		Undefined: 0
+		Low: 1
+		Medium: 3
+		High: 1
+	Total issues (by confidence):
+		Undefined: 0
+		Low: 0
+		Medium: 3
+		High: 2
+Files skipped (0):

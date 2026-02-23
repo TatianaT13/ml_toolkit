@@ -56,10 +56,13 @@ jobs:
     needs: [code-security, dependency-check]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - name: Run tests
+      - name: Install dependencies
         run: |
-          pip install pytest --quiet
-          echo "Tests coming soon"
+          pip install --upgrade pip --quiet
+          pip install numpy pandas scikit-learn scipy pytest --quiet
+          pip install -e . --quiet
+      - name: Run tests
+        run: pytest tests/ -v --tb=short
